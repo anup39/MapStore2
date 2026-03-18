@@ -1642,6 +1642,15 @@
         "label": "Scarica i metadati del file al salvataggio",
         "tooltip": "Questa opzione recupererà i metadati per supportare lo zoom a livello. Potrebbe rallentare l'operazione di ricerca se le immagini sono troppo grandi o troppe."
       },
+      "listView": "Vista elenco",
+      "gridView": "Vista griglia",
+      "selectAll":"Seleziona tutto",
+      "layers": "Livelli",
+      "edit": "Modifica",
+      "backToList":"Torna al catalogo",
+      "close": "Chiudi",
+      "showFullContent": "Mostra tutto il contenuto",
+      "hideFullContent": "Nascondi tutto il contenuto",
       "clearValueText": "Cancella selezione",
       "noResultsText": "Nessun risultato trovato",
       "tooltip": "Sfoglia Catalogo",
@@ -1683,7 +1692,8 @@
         "cog": "e.g. https://mydomain.com/cog.tif",
         "model": "e.g. https://mydomain.com/filename.ifc",
         "arcgis": "e.g. https://mydomain.com/arcgis/rest/services",
-        "flatgeobuf": "e.g. https://mydomain.com/filename.fgb"
+        "flatgeobuf": "e.g. https://mydomain.com/filename.fgb",
+        "geonode": "e.g https://mydomaingeonode.com"
       },
       "type": "Tipo",
       "serviceTitle": "Titolo",
@@ -2260,7 +2270,7 @@
         "placeholder": "Inserisci il nome della mappa",
         "selectLabel": "Seleziona una mappa",
         "infoOnHide": "Espandi il widget per vedere il selettore della mappa",
-        "subTitle": "<p>Per la selezione multipla,<br>su Windows usa CTRL + clic su <br> e su Mac usa control + clic</p>"
+        "subTitle": "<p>Puoi selezionare più livelli</p>"
       },
       "mapWidget": {
         "showBackgroundSelector": "Mostra il selettore di sfondo",
@@ -2276,7 +2286,7 @@
         "placeholder": "Inserisci il nome del grafico",
         "selectLabel": "Grafico",
         "infoOnHide": "Espandi il widget per vedere il selettore del grafico",
-        "subTitle": "<p>Per la selezione multipla,<br>su Windows usa CTRL + clic su <br> e su Mac usa control + clic</p>"
+        "subTitle": "<p>Puoi selezionare più livelli</p>"
       },
       "chartType": {
         "bar": {

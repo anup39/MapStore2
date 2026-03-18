@@ -30,9 +30,12 @@ const CatalogContentView = ({
     onAddLayer,
     layers,
     currentLocale,
-    readOnly,
     enableOrderBy,
-    children
+    children,
+    includeAddToMap,
+    multiSelect,
+    getRecordStatus,
+    messages
 }) => {
     return (
         <FlexFill flexBox column className="ms-catalog-content-view _relative">
@@ -40,17 +43,21 @@ const CatalogContentView = ({
                 total={total }
                 isAllSelected={isAllSelected}
                 isIndeterminate={isIndeterminate}
-                selectedCount={selectedLayers.length}
+                selectedCount={selectedLayers?.length || 0}
                 onSelectAll={onSelectAll}
                 onAddSelected={onAddSelected}
                 enableOrderBy={enableOrderBy}
                 selectedFormat={selectedFormat}
                 onSortChange={onSortChange}
                 sort={sort}
+                loading={loading}
+                includeAddToMap={includeAddToMap}
+                multiSelect={multiSelect}
             />
             <FlexFill flexBox className="_relative ms-catalog-content-view-body" >
                 <div className="_absolute _fill _overflow-auto">
                     <CatalogList
+                        loading={loading}
                         records={records}
                         wrapCards={wrapCards}
                         loadingLayers={loadingLayers}
@@ -59,18 +66,25 @@ const CatalogContentView = ({
                         onAddLayer={onAddLayer}
                         layers={layers}
                         currentLocale={currentLocale}
-                        readOnly={readOnly}
+                        includeAddToMap={includeAddToMap}
+                        multiSelect={multiSelect}
+                        getRecordStatus={getRecordStatus}
+                        messages={messages}
                     />
-                    {loading ? (
-                        <FlexBox centerChildren classNames={['_overlay', '_absolute', '_fill', '_corner-tl']}>
-                            <Text fontSize="xxl">
-                                <Spinner />
-                            </Text>
-                        </FlexBox>
-                    ) : null}
                 </div>
+                {loading ? (
+                    <FlexBox centerChildren className="ms-catalog-content-view-loader" classNames={['_overlay', '_absolute', '_fill', '_corner-tl']}>
+                        <Text fontSize="xxl">
+                            <Spinner />
+                        </Text>
+                    </FlexBox>
+                ) : null}
             </FlexFill>
-            {children}
+            {children ? (
+                <div className="ms-catalog-content-view-footer">
+                    {children}
+                </div>
+            ) : null}
         </FlexFill>
     );
 };

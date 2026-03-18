@@ -37,7 +37,10 @@ const CatalogCard = ({
     readOnly,
     loading,
     disabled,
-    onAdd
+    onAdd,
+    multiSelect,
+    loadingRecords,
+    includeAddToMap
 }) => {
     const [showFullContent, setShowFullContent] = useState(false);
     const popoverContainerRef = useRef(null);
@@ -66,79 +69,80 @@ const CatalogCard = ({
     const links = showGetCapLinks ? getRecordLinks(record) : [];
     const showServices = !isEmpty(record?.additionalOGCServices);
 
-    const buttons = [{
-        Component: (props) => (
-            showServices ?
-                <div
-                    className="catalog-split-button"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                    }}
-                >
-                    <SplitButton
-                        title={<Glyphicon glyph="plus" />}
-                        pullRight
+    const buttons = [
+        ...(includeAddToMap ? [{
+            Component: (props) => (
+                showServices ?
+                    <div
+                        className="catalog-split-button"
                         onClick={(e) => {
                             e.stopPropagation();
-                            onAddToMap(record);
                         }}
                     >
-                        <MenuItem
+                        <SplitButton
+                            pullRight
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onAddToMap(record);
                             }}
+                            title={loading ? <Spinner /> : <Glyphicon glyph="plus" />}
                         >
-                            <Message msgId="catalog.additionalOGCServices.wms" />
-                        </MenuItem>
-                        {Object.keys(record?.additionalOGCServices || {}).map((serviceType) => (
                             <MenuItem
-                                key={serviceType}
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    onAddToMap(record?.additionalOGCServices?.[serviceType], serviceType);
+                                    onAddToMap(record);
                                 }}
                             >
-                                <Message msgId={`catalog.additionalOGCServices.${serviceType}`} />
+                                <Message msgId="catalog.additionalOGCServices.wms" />
                             </MenuItem>
-                        ))}
-                    </SplitButton>
-                </div>
-                :
-                <Button
-                    {...props}
-                    className="square-button-md"
-                    disabled={loading}
-                    onClick={(e) => {
-                        if (!disabled) {
-                            e.stopPropagation();
-                            onAddToMap(record);
-                        }
-                    }}
-                >
-                    {loading ? <Spinner /> : <Glyphicon glyph="plus" />}
-                </Button>
+                            {Object.keys(record?.additionalOGCServices || {}).map((serviceType) => (
+                                <MenuItem
+                                    key={serviceType}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onAddToMap(record?.additionalOGCServices?.[serviceType], serviceType);
+                                    }}
+                                >
+                                    <Message msgId={`catalog.additionalOGCServices.${serviceType}`} />
+                                </MenuItem>
+                            ))}
+                        </SplitButton>
+                    </div>
+                    :
+                    <Button
+                        {...props}
+                        className="square-button-md"
+                        disabled={loading}
+                        onClick={(e) => {
+                            if (!disabled) {
+                                e.stopPropagation();
+                                onAddToMap(record);
+                            }
+                        }}
+                    >
+                        {loading ? <Spinner /> : <Glyphicon glyph="plus" />}
+                    </Button>
 
-        ),
-        name: 'addToMap',
-        target: 'card-buttons'
-    },
-    ...(links.length > 0
-        ? [{
-            Component: () => (
-                <SharingLinks
-                    key="sharing-links"
-                    popoverContainer={popoverContainerRef.current}
-                    links={links}
-                    onCopy={onCopy}
-                    buttonSize={buttonSize}
-                    addAuthentication={addAuthentication}
-                />
             ),
-            name: 'sharingLinks',
+            name: 'addToMap',
             target: 'card-buttons'
-        }]
-        : [])];
+        }] : []),
+        ...(links.length > 0
+            ? [{
+                Component: () => (
+                    <SharingLinks
+                        key="sharing-links"
+                        popoverContainer={popoverContainerRef.current}
+                        links={links}
+                        onCopy={onCopy}
+                        buttonSize={buttonSize}
+                        addAuthentication={addAuthentication}
+                    />
+                ),
+                name: 'sharingLinks',
+                target: 'card-buttons'
+            }]
+            : [])];
 
     const options = [
         {
@@ -150,7 +154,7 @@ const CatalogCard = ({
                         setShowFullContent(!showFullContent);
                     }}
                 >
-                    {showFullContent ? 'Hide Full Content' : 'Show Full Content'}
+                    {showFullContent ? <Message msgId="catalog.hideFullContent" /> : <Message msgId="catalog.showFullContent" />}
                 </li>
             ),
             name: 'toggleDetails',
@@ -161,13 +165,17 @@ const CatalogCard = ({
             key={`${record?.identifier}`}
             ref={popoverContainerRef}
             aria-disabled={!!disabled}
-            className={`ms-catalog-card${disabled ? ' disabled' : ''}`}
+            className={`ms-catalog-card${disabled ? ' disabled' : ''}${hideThumbnail ? ' ms-catalog-card--no-thumbnail' : ''}`}
+            style ={{
+                opacity: disabled ? 0.5 : 1,
+                pointerEvents: disabled ? 'none' : 'auto'
+            }}
         >
-            {!disabled ? <Checkbox
+            {!disabled && multiSelect && !loadingRecords ? <Checkbox
                 checked={isChecked}
                 onChange={(event) => {
                     event.stopPropagation();
-                    onToggle(record, event.target.checked);
+                    onToggle(record, event.target.checked, event);
                 }}
             /> : null}
             <ResourceCard
@@ -186,7 +194,7 @@ const CatalogCard = ({
                     }
                 }}
                 options={options}
-                buttons={buttons}
+                buttons={disabled ? [] : buttons}
                 readOnly={readOnly}
                 hideThumbnail={hideThumbnail}
                 onClick={() => {
@@ -194,6 +202,7 @@ const CatalogCard = ({
                         onToggle(record, !isChecked);
                     }
                 }}
+                active={isChecked}
                 layoutCardsStyle="grid"
                 metadata={[
                     { path: '@extras.info.title', target: 'header', showFullContent: showFullContent },
@@ -206,7 +215,14 @@ const CatalogCard = ({
                     },
                     { path: '@extras.info.metadataTemplate', target: 'body', ellipsis: false, showFullContent: showFullContent, type: 'html' },
                     { path: '@extras.info.description', target: 'body', ellipsis: false, showFullContent: showFullContent },
-                    { path: 'tags', itemColor: 'color', itemValue: 'name', showFullContent: false, type: 'tag', target: 'footer' }
+                    record?.tags && {
+                        path: 'tags',
+                        itemColor: 'color',
+                        itemValue: 'name',
+                        showFullContent: false,
+                        type: 'tag',
+                        target: 'footer'
+                    }
                 ]}
             />
             {loading ? (

@@ -9,7 +9,7 @@ import React from 'react';
 import ReactSelect from 'react-select';
 import { FormGroup, Glyphicon, InputGroup } from 'react-bootstrap';
 import Button from '../../../components/layout/Button';
-import { getMessageById } from '../../../utils/LocaleUtils';
+import Message from '../../../components/I18N/Message';
 
 const SelectSync = ReactSelect;
 
@@ -19,35 +19,41 @@ const CatalogServiceSelect = ({
     onConfigureClick,
     onChangeSelectedService,
     selectedService,
-    messages,
-    onDeleteService
+    onDeleteService,
+    setShowFilters
 }) => {
     const getServices = () => {
         if (!services) return [];
         return Object.keys(services).map((key) => {
             const service = services[key];
             return {
-                label: service.titleMsgId ? getMessageById(messages, service.titleMsgId) : service.title,
-                value: key
+                label: service.titleMsgId ? <Message msgId={service.titleMsgId} /> : service.title,
+                value: key,
+                service: { ...service, key }
             };
         });
+    };
+
+    const handleDeleteService = () => {
+        onDeleteService(selectedService);
+        setShowFilters(false);
     };
 
     return (
         <FormGroup className="ms-catalog-service-select">
             <InputGroup>
                 <SelectSync
-                    clearValueText={getMessageById(messages, "catalog.clearValueText")}
-                    noResultsText={getMessageById(messages, "catalog.noResultsText")}
+                    clearValueText={<Message msgId="catalog.clearValueText" />}
+                    noResultsText={<Message msgId="catalog.noResultsText" />}
                     clearable
                     options={getServices()}
                     value={selectedService}
-                    onChange={(val) => onChangeSelectedService(val && val.value ? val.value : "")}
-                    placeholder={getMessageById(messages, "catalog.servicePlaceholder")}
+                    onChange={(val) => onChangeSelectedService(val && val.value ? val.value : "", val?.service)}
+                    placeholder={<Message msgId="catalog.servicePlaceholder" />}
                 />
                 <InputGroup.Addon>
                     <Button
-                        title="Add Service"
+                        className= "ms-catalog-service-btn"
                         onClick={() => onConfigureClick('edit', true)}
                     >
                         <Glyphicon glyph="plus" />
@@ -55,22 +61,23 @@ const CatalogServiceSelect = ({
                 </InputGroup.Addon>
                 <InputGroup.Addon>
                     <Button
-                        title="Edit Service"
+                        className= "ms-catalog-service-btn"
                         onClick={() => onConfigureClick('edit', false)}
                         disabled={!canEdit || !selectedService}
                     >
                         <Glyphicon glyph="pencil" />
                     </Button>
                 </InputGroup.Addon>
-                <InputGroup.Addon>
+                {onDeleteService ? <InputGroup.Addon>
                     <Button
-                        title="Delete Service"
-                        onClick={() => onDeleteService(selectedService)}
+                        className= "ms-catalog-service--btn"
+                        onClick={handleDeleteService}
                         disabled={!canEdit || !selectedService}
                     >
                         <Glyphicon glyph="trash" />
                     </Button>
-                </InputGroup.Addon>
+                </InputGroup.Addon> : null}
+
             </InputGroup>
         </FormGroup>
     );
